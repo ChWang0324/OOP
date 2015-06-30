@@ -167,15 +167,12 @@ class Role
 		bool moveRight();
 		bool moveDown();
 		bool moveUp();
-		//void transferMap(Map);
-		//int getRoleX() {return x;}
-		//int getRoleY() {return y;}
 		void inistialize_position();
 		void display();
 		bool isDead(){return hp <= 0;};
 		int getMapNo(){return MapNo;};
 		void attack();
-		void beAttacked();
+		void beAttacked(int);
 		void recover();
 		void levelUp();
 		void raiseExp(int);
@@ -183,6 +180,7 @@ class Role
 		void changeWeapon();
 		void weaponEffect();
 		void changeStrength(int);
+		int getStrength(){return strength;}
 		void changeDex(int);
 		int getWeaponNum(){return weaponNum;}
 	private:
@@ -193,7 +191,7 @@ class Role
 		string roleName;
 		int strength;
 		int MapNo;
-		int Level;  // 等級平方+20*等級
+		int Level;
 		int Exp;
 		int weaponNum;
 		string Weapon;
@@ -273,12 +271,12 @@ void Role::display()
 
 void Role::attack()
 {
-	cout << "You attack slime , cause " << strength << " demages!!    ";
+	cout << "You attack slime , cause " << getStrength() << " demages!!    ";
 }
 
-void Role::beAttacked()
+void Role::beAttacked(int x)
 {
-	hp -= 10;
+	hp -= x;
 	if(hp < 0) hp = 0;
 	cout << "Your HP: " << hp << endl << endl;
 }
@@ -359,37 +357,55 @@ void Role::weaponEffect()
 
 
 
-class Slime
+class Monster
+{
+	public:
+		Monster(int x) : strength(x){};
+		~Monster(){};
+		int getHp(){return hp;}
+		void setHp(int x){hp = x + rand()%41;}
+		void decreaseHp(int x){hp -= x;}
+		void setDead(){hp = 0;}
+		int getExp(){return exp;}
+		void setExp(int x){exp = x;}
+		int getStrength(){return strength;}
+		bool isDead(){return getHp() <= 0;};
+		virtual void attack() = 0;
+		virtual void beAttacked(int) = 0;
+	private:
+		int hp;
+		int exp;
+		int strength;
+};
+
+class Slime : public Monster
 {
 	public:
 	    Slime();
 		~Slime(){};
-		bool isDead(){return hp <= 0;};
 		void attack();
-		void beAttacked();
-		int getExp(){return exp;};
+		void beAttacked(int);
 	private:
-	    int hp;
-	    int exp;
-		int strength;
+		static const int initStrength = 10;
+		static const int initHp = 70;
 };
 
-Slime::Slime() : strength(10)
+Slime::Slime() : Monster(initStrength)
 {
-	hp = 70 + rand()%41;
-	exp = hp;
+	setHp(initHp);
+	setExp( getHp() );
 }
 
 void Slime::attack()
 {
-	cout << "Slime attack you , cause " << strength << " demages!!    ";
+	cout << "Slime attack you , cause " << getStrength() << " demages!!    ";
 }
 
-void Slime::beAttacked()
+void Slime::beAttacked(int x)
 {
-	hp -= 20;
-	if(hp <= 0) hp = 0;
-	cout << "Smile's HP: " << hp << endl << endl;
+	decreaseHp(x);
+	if(getHp() <= 0) setDead();
+	cout << "Smile's HP: " << getHp() << endl << endl;
 }
 
 
@@ -456,13 +472,13 @@ int main(){
 					if(rand()%100 < player1.getDex())
 					{
 						player1.attack();
-						slime->beAttacked();
+						slime->beAttacked(player1.getStrength());
 						status = !slime->isDead() ? 1 : 3;
 					}
 					else
 					{
 						slime->attack();
-						player1.beAttacked();
+						player1.beAttacked(slime->getStrength());
 						status = !player1.isDead() ? 2 : 4;
 					}
 					player1.getWeaponNum() ? displayFighting(status+5) : displayFighting(status);
