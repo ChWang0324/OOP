@@ -365,11 +365,11 @@ class Monster
 		int getHp(){return hp;}
 		void setHp(int x){hp = x + rand()%41;}
 		void decreaseHp(int x){hp -= x;}
-		void setDead(){hp = 0;}
+		bool isDead(){return getHp() <= 0;};
+		void setHpZero(){hp = 0;}
 		int getExp(){return exp;}
 		void setExp(int x){exp = x;}
 		int getStrength(){return strength;}
-		bool isDead(){return getHp() <= 0;};
 		virtual void attack() = 0;
 		virtual void beAttacked(int) = 0;
 	private:
@@ -398,14 +398,14 @@ Slime::Slime() : Monster(initStrength)
 
 void Slime::attack()
 {
-	cout << "Slime attack you , cause " << getStrength() << " demages!!    ";
+	cout << "Slime attacked you , caused " << getStrength() << " demages!!    ";
 }
 
 void Slime::beAttacked(int x)
 {
 	decreaseHp(x);
-	if(getHp() <= 0) setDead();
-	cout << "Smile's HP: " << getHp() << endl << endl;
+	if(isDead()) setHpZero();
+	cout << "Slime's HP: " << getHp() << endl << endl;
 }
 
 
