@@ -5,15 +5,18 @@
 #include <vector>
 using namespace std;
 
-const int defaultHp = 200;
-const int defaultMp = 100;
-const int defaultX = 1;
-const int defaultY = 1;
-const int defaultStrength = 20;
-const int defaultExp = 0;
-const int defaultLevel = 1;
-const int defaultDex = 45;
-const string weaponList[4] = {"NO_WEAPON","BASEBALL BAT","AXE","SWORD"};
+namespace defaultValue {
+	int defaultHp = 200;
+	int defaultMp = 100;
+	int defaultX = 1;
+	int defaultY = 1;
+	int defaultStrength = 20;
+	int defaultExp = 0;
+	int defaultLevel = 1;
+	int defaultDex = 45;
+	string weaponList[4] = {"NO_WEAPON","BASEBALL BAT","AXE","SWORD"};
+};
+
 
 char map[2][10][36] =
 {
@@ -200,14 +203,14 @@ class Role
 
 Role::Role(string name, int No) : roleName(name) , MapNo(No)
 {
-	hp = defaultHp;
-	mp = defaultMp;
-	strength = defaultStrength;
-	Exp = defaultExp;
-	Level = defaultLevel;
-	Dex = defaultDex;
+	hp = defaultValue::defaultHp;
+	mp = defaultValue::defaultMp;
+	strength = defaultValue::defaultStrength;
+	Exp = defaultValue::defaultExp;
+	Level = defaultValue::defaultLevel;
+	Dex = defaultValue::defaultDex;
 	weaponNum = 0;
-	Weapon = weaponList[weaponNum];
+	Weapon = defaultValue::weaponList[weaponNum];
 }
 
 bool Role::moveLeft()
@@ -238,7 +241,7 @@ bool Role::moveUp()
 	else if(map[MapNo-1][x-1][y] == '2') {MapNo = (MapNo*-1)+3; inistialize_position(); return true;}
 }
 
-
+/*	inistialize the position of the new role	*/
 void Role::inistialize_position()
 {
 	for( int i = 0 ; i < 10 ; i++ )
@@ -250,6 +253,7 @@ void Role::inistialize_position()
 			}
 }
 
+/*	draw the map and display where the role is	*/
 void Role::display()
 {
 	cout << endl;
@@ -269,11 +273,16 @@ void Role::display()
 	;
 }
 
+/*	print the damages when the role attacks a monster	
+	the damage that the role causes equals to the strength of the role	*/
 void Role::attack()
 {
 	cout << "You attack slime , cause " << getStrength() << " demages!!    ";
 }
 
+/*	when a monster attacks the role,	
+	the damage is subtracted from the original hp of the role	
+	print the hp of the role	*/
 void Role::beAttacked(int x)
 {
 	hp -= x;
@@ -281,12 +290,15 @@ void Role::beAttacked(int x)
 	cout << "Your HP: " << hp << endl << endl;
 }
 
+/*	the role has a chance to raise his hp	*/
 void Role::recover()
 {
 	hp += rand()%80+51;
 	cout << roleName << " recover , hp is " << hp << " now" << endl << endl;
 }
 
+/*	when the role drives a monster back,	
+	the role will get the experience	*/
 void Role::raiseExp(int e)
 {
 	Exp += e/2;
@@ -294,41 +306,48 @@ void Role::raiseExp(int e)
 	cout << "Now your experience is " << Exp << endl;
 }
 
+/*	check the role's level
+	if level-up,
+	change his strength	*/
 void Role::levelUp()
 {
 	if(Exp >= 100*Level*Level)
 	{
 		Level++;
 		cout << "Congratulations!!! Level-up!!! And now your level is " << Level << endl;
-		weaponEffect();	// update the strength for level-up
+		weaponEffect();
+		/*	weaponEffect() will change the strength according to role's level and weapon	*/
 	}
 }
 
 void Role::changeStrength(int effect)
 {
-	strength = defaultStrength + (Level-1)*5 + effect;
+	strength = defaultValue::defaultStrength + (Level-1)*5 + effect;
 }
 
 void Role::changeDex(int effect)
 {
-	Dex = defaultDex + (Level-1)*3 + effect;
+	Dex = defaultValue::defaultDex + (Level-1)*3 + effect;
 }
 
+/*	role can change his weapon
+	as long as his level is enough	*/
 void Role::changeWeapon()
 {
-	if(Level < 3)	// for Level 0, 1 or 2, no other weapon
+	if(Level < 3)	// for Level 0, 1 or 2, the role has no other weapon
 	{
 		cout << "You have no other weapon." << endl << endl;
 	}
 	else
 	{
 		(Level >= (weaponNum+1)*2+1) ? weaponNum++ : weaponNum = 0;
-		Weapon = weaponList[weaponNum];
+		Weapon = defaultValue::weaponList[weaponNum];
 		cout << "You take " << Weapon << " as your weapon now" << endl;
 		weaponEffect();
 	}
 }
 
+/*	every weapon has separate effect for strength and dex of role	*/
 void Role::weaponEffect()
 {
 	if(weaponNum == 0)
@@ -396,11 +415,16 @@ Slime::Slime() : Monster(initStrength)
 	setExp( getHp() );
 }
 
+/*	print the damages when a monster attacks the role	
+	the damage that the monster causes equals to the strength of it	*/
 void Slime::attack()
 {
 	cout << "Slime attacked you , caused " << getStrength() << " demages!!    ";
 }
 
+/*	when a role attacks the monster,	
+	the damage is subtracted from the original hp of the mosnter	
+	print the hp of the monster	*/
 void Slime::beAttacked(int x)
 {
 	decreaseHp(x);
@@ -409,7 +433,10 @@ void Slime::beAttacked(int x)
 }
 
 
-
+/*	draw the scene when the role fight with a monster
+	parameter k means the number of the scene
+	based on whether the role takes a weapon and
+	the role attacks a monster or a monster attacks the role	*/
 void displayFighting(int k)
 {
 	for(int i = 0 ; i < 7 ; i++){
@@ -440,6 +467,7 @@ int main(){
 		
 		if(canMove) player1.display();
 		if(canMove && rand()%10 > 8) player1.recover();
+		/*	the probability that the role raises his hp	*/
 		canMove = false;
 		cout << "key in A/S/D/W/Q (RIGHT/DOWN/LEFT/UP/CHANGE_WEAPON): ";
 		cin >> command;
@@ -450,6 +478,7 @@ int main(){
 		if(command == 'q' || command == 'Q') player1.changeWeapon();
 				
 		if( (rand()%5 > 3) && canMove ){
+		/*	the probability that the role encounters a monster	*/
 			cout << endl << "The slime appears!! The Fight starts!!";
 			cout << endl << "The slime appears!! The Fight starts!!";
 			cout << endl << "The slime appears!! The Fight starts!!";
@@ -467,8 +496,6 @@ int main(){
 				if(command == '1' || command == '2')
 				{
 					cout << endl << endl;
-//					randnum = rand()%2 + 1;
-//					if((int)command == randnum+48)
 					if(rand()%100 < player1.getDex())
 					{
 						player1.attack();
